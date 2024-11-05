@@ -1,0 +1,92 @@
+/* Reset some default styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Header styling */
+header {
+  font-size: 2rem;
+  color: #ffffff;
+  background-color: #4a90e2;
+  padding: 1.5rem;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+body {
+  margin: 0; /* Removes any default margin */
+  padding: 0;
+  font-family: "Arial", sans-serif;
+  background: linear-gradient(to right, #f8fafc, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: #333;
+}
+
+canvas {
+  position: absolute;
+}
+.container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container for result sections */
+.result-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+/* Individual result box styling */
+.result-box {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 1rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  min-width: 130px;
+}
+
+.result-box:hover {
+  transform: translateY(-5px); /* Adds a subtle hover effect */
+}
+
+.result-box div {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+.result-box #emotion {
+  color: #ff6b6b; /* Emphasis color for emotion */
+}
+
+.result-box #gender {
+  color: #4a90e2; /* Different color for gender */
+}
+
+.result-box #age {
+  color: #50c878; /* Green tone for age */
+}
+video {
+  width: 100%;
+}
+header {
+  background: #42a5f5;
+  color: white;
+  width: 100%;
+  font-size: 2rem;
+  padding: 1rem;
+  font-size: 2rem;
+}
