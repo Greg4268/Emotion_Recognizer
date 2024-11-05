@@ -9,7 +9,7 @@
 header {
   font-size: 2rem;
   color: #ffffff;
-  background-color: #4a90e2;
+  background-color: #302c2c;
   padding: 1.5rem;
   width: 100%;
   text-align: center;
@@ -76,15 +76,6 @@ body {
   color: #50c878; /* Green tone for age */
 }
 
-header {
-  background: #42a5f5;
-  color: white;
-  width: 100%;
-  font-size: 2rem;
-  padding: 1rem;
-  font-size: 2rem;
-}
-
 canvas {
   position: absolute;
 }
@@ -97,6 +88,7 @@ video {
   transform: scaleX(-1); /* Mirrors the video horizontally */
 }
 
-video, canvas {
-    transform: scaleX(-1);
-  }
+video,
+canvas {
+  transform: scaleX(-1);
+}

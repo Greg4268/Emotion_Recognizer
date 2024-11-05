@@ -86,16 +86,19 @@ function detectFaces() {
       const body = document.body;
       switch (maxExpression) {
         case "happy":
-          body.style.backgroundColor = "green";
+          body.style.backgroundColor = "#78d966";
           break;
         case "neutral":
-          body.style.backgroundColor = "tan";
+          body.style.backgroundColor = "#a6a39e";
           break;
         case "sad":
-          body.style.backgroundColor = "red";
+          body.style.backgroundColor = "#3349aa";
           break;
         case "surprised":
           body.style.backgroundColor = "yellow";
+          break;
+        case "angry":
+          body.style.backgroundColor = "#e74f4f";
           break;
         default:
           body.style.backgroundColor = "white"; // Default for unlisted emotions
@@ -113,7 +116,7 @@ function detectFaces() {
 
 video.addEventListener("playing", detectFaces);
 
-/**** Age Prediction Smoothing ****/
+// age prediction - removed for speed 
 // function interpolateAgePredictions(age) {
 //   predictedAges = [age].concat(predictedAges).slice(0, 15);
 //   const avgPredictedAge =
