@@ -6,9 +6,9 @@ let predictedAges = [];
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
   faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
-  faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
+  //faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
   faceapi.nets.faceExpressionNet.loadFromUri("/models"),
-  faceapi.nets.ageGenderNet.loadFromUri("/models"),
+  //faceapi.nets.ageGenderNet.loadFromUri("/models"),
 ])
   .then(startVideo)
   .catch((err) => console.error("Error loading models:", err));
@@ -46,8 +46,8 @@ function detectFaces() {
       const detections = await faceapi
         .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
-        .withFaceExpressions()
-        .withAgeAndGender();
+        .withFaceExpressions();
+      //.withAgeAndGender();
 
       if (!detections) {
         console.warn("No face detected");
@@ -71,16 +71,36 @@ function detectFaces() {
 
       // Update DOM with values
       const { age, gender, expressions } = resizedDetections;
-      const interpolatedAge = interpolateAgePredictions(age);
+      //const interpolatedAge = interpolateAgePredictions(age);
       const maxExpression = Object.keys(expressions).reduce((a, b) =>
         expressions[a] > expressions[b] ? a : b
       );
 
-      document.getElementById("age").innerText = `Age - ${interpolatedAge}`;
-      document.getElementById("gender").innerText = `Gender - ${gender}`;
+      //document.getElementById("age").innerText = `Age - ${interpolatedAge}`;
+      //document.getElementById("gender").innerText = `Gender - ${gender}`;
       document.getElementById(
         "emotion"
       ).innerText = `Emotion - ${maxExpression}`;
+
+      // Set background color based on detected emotion
+      const body = document.body;
+      switch (maxExpression) {
+        case "happy":
+          body.style.backgroundColor = "green";
+          break;
+        case "neutral":
+          body.style.backgroundColor = "tan";
+          break;
+        case "sad":
+          body.style.backgroundColor = "red";
+          break;
+        case "surprised":
+          body.style.backgroundColor = "yellow";
+          break;
+        default:
+          body.style.backgroundColor = "white"; // Default for unlisted emotions
+          break;
+      }
     } catch (error) {
       console.error("Error during face detection:", error);
     }
@@ -94,9 +114,9 @@ function detectFaces() {
 video.addEventListener("playing", detectFaces);
 
 /**** Age Prediction Smoothing ****/
-function interpolateAgePredictions(age) {
-  predictedAges = [age].concat(predictedAges).slice(0, 30);
-  const avgPredictedAge =
-    predictedAges.reduce((total, a) => total + a) / predictedAges.length;
-  return avgPredictedAge;
-}
+// function interpolateAgePredictions(age) {
+//   predictedAges = [age].concat(predictedAges).slice(0, 15);
+//   const avgPredictedAge =
+//     predictedAges.reduce((total, a) => total + a) / predictedAges.length;
+//   return avgPredictedAge;
+// }
