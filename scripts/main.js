@@ -2,75 +2,98 @@ const video = document.getElementById("video");
 const isScreenSmall = window.matchMedia("(max-width: 700px)");
 let predictedAges = [];
 
-/****Loading the model ****/
+/**** Loading the models with error handling ****/
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
   faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
   faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
   faceapi.nets.faceExpressionNet.loadFromUri("/models"),
   faceapi.nets.ageGenderNet.loadFromUri("/models"),
-]).then(startVideo);
+])
+  .then(startVideo)
+  .catch((err) => console.error("Error loading models:", err));
 
 function startVideo() {
   navigator.getUserMedia(
     { video: {} },
     (stream) => (video.srcObject = stream),
-    (err) => console.error(err)
+    (err) => console.error("Error accessing webcam:", err)
   );
 }
 
-/****Fixing the video with based on size ****/
+/**** Adjust video width based on screen size ****/
 function screenResize(isScreenSmall) {
-  if (isScreenSmall.matches) {
-    video.style.width = "320px";
-  } else {
-    video.style.width = "500px";
-  }
+  video.style.width = isScreenSmall.matches ? "320px" : "500px";
 }
-
 screenResize(isScreenSmall);
 isScreenSmall.addListener(screenResize);
 
-/****Event Listeiner for the video****/
-video.addEventListener("playing", () => {
+/**** Face Detection Function with Error Handling ****/
+function detectFaces() {
   const canvas = faceapi.createCanvasFromMedia(video);
-  let container = document.querySelector(".container");
-  container.append(canvas);
+  video.parentNode.insertBefore(canvas, video.nextSibling);
 
-  const displaySize = { width: video.width, height: video.height };
-  faceapi.matchDimensions(canvas, displaySize);
+  const updateCanvasSize = () => {
+    const displaySize = { width: video.videoWidth, height: video.videoHeight };
+    faceapi.matchDimensions(canvas, displaySize);
+  };
 
-  setInterval(async () => {
-    const detections = await faceapi
-      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceExpressions()
-      .withAgeAndGender();
+  updateCanvasSize(); // Set initial canvas size
+  window.addEventListener("resize", updateCanvasSize);
 
-    const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+  async function onPlay() {
+    try {
+      const detections = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceExpressions()
+        .withAgeAndGender();
 
-    /****Drawing the detection box and landmarkes on canvas****/
-    faceapi.draw.drawDetections(canvas, resizedDetections);
-    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      if (!detections) {
+        console.warn("No face detected");
+        requestAnimationFrame(onPlay); // Continue if no detections
+        return;
+      }
 
-    /****Setting values to the DOM****/
-    if (resizedDetections && Object.keys(resizedDetections).length > 0) {
-      const age = resizedDetections.age;
+      const displaySize = {
+        width: video.videoWidth,
+        height: video.videoHeight,
+      };
+      faceapi.matchDimensions(canvas, displaySize);
+      const resizedDetections = faceapi.resizeResults(detections, displaySize);
+
+      const context = canvas.getContext("2d");
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Only draw if detections exist
+      faceapi.draw.drawDetections(canvas, resizedDetections);
+      faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+
+      // Update DOM with values
+      const { age, gender, expressions } = resizedDetections;
       const interpolatedAge = interpolateAgePredictions(age);
-      const gender = resizedDetections.gender;
-      const expressions = resizedDetections.expressions;
-      const maxValue = Math.max(...Object.values(expressions));
-      const emotion = Object.keys(expressions).filter(
-        (item) => expressions[item] === maxValue
+      const maxExpression = Object.keys(expressions).reduce((a, b) =>
+        expressions[a] > expressions[b] ? a : b
       );
+
       document.getElementById("age").innerText = `Age - ${interpolatedAge}`;
       document.getElementById("gender").innerText = `Gender - ${gender}`;
-      document.getElementById("emotion").innerText = `Emotion - ${emotion[0]}`;
+      document.getElementById(
+        "emotion"
+      ).innerText = `Emotion - ${maxExpression}`;
+    } catch (error) {
+      console.error("Error during face detection:", error);
     }
-  }, 100);
-});
 
+    requestAnimationFrame(onPlay); // Continue loop
+  }
+
+  requestAnimationFrame(onPlay);
+}
+
+video.addEventListener("playing", detectFaces);
+
+/**** Age Prediction Smoothing ****/
 function interpolateAgePredictions(age) {
   predictedAges = [age].concat(predictedAges).slice(0, 30);
   const avgPredictedAge =

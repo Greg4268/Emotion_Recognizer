@@ -31,9 +31,6 @@ body {
   color: #333;
 }
 
-canvas {
-  position: absolute;
-}
 .container {
   display: flex;
   width: 100%;
@@ -79,9 +76,7 @@ canvas {
 .result-box #age {
   color: #50c878; /* Green tone for age */
 }
-video {
-  width: 100%;
-}
+
 header {
   background: #42a5f5;
   color: white;
@@ -90,3 +85,19 @@ header {
   padding: 1rem;
   font-size: 2rem;
 }
+
+canvas {
+  position: absolute;
+}
+
+video {
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 500px;
+  height: 500px;
+  transform: scaleX(-1); /* Mirrors the video horizontally */
+}
+
+video, canvas {
+    transform: scaleX(-1);
+  }
