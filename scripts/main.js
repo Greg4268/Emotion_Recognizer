@@ -42,72 +42,78 @@ function detectFaces() {
   window.addEventListener("resize", updateCanvasSize);
 
   async function onPlay() {
-    try {
-      const detections = await faceapi
-        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceExpressions();
-      //.withAgeAndGender();
+    let frameCount = 0;
+    if (frameCount % 3 === 0) {
+      try {
+        const detections = await faceapi
+          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceExpressions();
+        //.withAgeAndGender();
 
-      if (!detections) {
-        console.warn("No face detected");
-        requestAnimationFrame(onPlay); // Continue if no detections
-        return;
+        if (!detections) {
+          console.warn("No face detected");
+          requestAnimationFrame(onPlay); // Continue if no detections
+          return;
+        }
+
+        const displaySize = {
+          width: video.videoWidth,
+          height: video.videoHeight,
+        };
+        faceapi.matchDimensions(canvas, displaySize);
+        const resizedDetections = faceapi.resizeResults(
+          detections,
+          displaySize
+        );
+
+        const context = canvas.getContext("2d");
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Only draw if detections exist
+        faceapi.draw.drawDetections(canvas, resizedDetections);
+        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+
+        // Update DOM with values
+        const { age, gender, expressions } = resizedDetections;
+        //const interpolatedAge = interpolateAgePredictions(age);
+        const maxExpression = Object.keys(expressions).reduce((a, b) =>
+          expressions[a] > expressions[b] ? a : b
+        );
+
+        //document.getElementById("age").innerText = `Age - ${interpolatedAge}`;
+        //document.getElementById("gender").innerText = `Gender - ${gender}`;
+        document.getElementById(
+          "emotion"
+        ).innerText = `Emotion - ${maxExpression}`;
+
+        // Set background color based on detected emotion
+        const body = document.body;
+        switch (maxExpression) {
+          case "happy":
+            body.style.backgroundColor = "#78d966";
+            break;
+          case "neutral":
+            body.style.backgroundColor = "#a6a39e";
+            break;
+          case "sad":
+            body.style.backgroundColor = "#3349aa";
+            break;
+          case "surprised":
+            body.style.backgroundColor = "yellow";
+            break;
+          case "angry":
+            body.style.backgroundColor = "#e74f4f";
+            break;
+          default:
+            body.style.backgroundColor = "white"; // Default for unlisted emotions
+            break;
+        }
+      } catch (error) {
+        console.error("Error during face detection:", error);
       }
-
-      const displaySize = {
-        width: video.videoWidth,
-        height: video.videoHeight,
-      };
-      faceapi.matchDimensions(canvas, displaySize);
-      const resizedDetections = faceapi.resizeResults(detections, displaySize);
-
-      const context = canvas.getContext("2d");
-      context.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Only draw if detections exist
-      faceapi.draw.drawDetections(canvas, resizedDetections);
-      faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-
-      // Update DOM with values
-      const { age, gender, expressions } = resizedDetections;
-      //const interpolatedAge = interpolateAgePredictions(age);
-      const maxExpression = Object.keys(expressions).reduce((a, b) =>
-        expressions[a] > expressions[b] ? a : b
-      );
-
-      //document.getElementById("age").innerText = `Age - ${interpolatedAge}`;
-      //document.getElementById("gender").innerText = `Gender - ${gender}`;
-      document.getElementById(
-        "emotion"
-      ).innerText = `Emotion - ${maxExpression}`;
-
-      // Set background color based on detected emotion
-      const body = document.body;
-      switch (maxExpression) {
-        case "happy":
-          body.style.backgroundColor = "#78d966";
-          break;
-        case "neutral":
-          body.style.backgroundColor = "#a6a39e";
-          break;
-        case "sad":
-          body.style.backgroundColor = "#3349aa";
-          break;
-        case "surprised":
-          body.style.backgroundColor = "yellow";
-          break;
-        case "angry":
-          body.style.backgroundColor = "#e74f4f";
-          break;
-        default:
-          body.style.backgroundColor = "white"; // Default for unlisted emotions
-          break;
-      }
-    } catch (error) {
-      console.error("Error during face detection:", error);
     }
-
+    frameCount++;
     requestAnimationFrame(onPlay); // Continue loop
   }
 
@@ -116,7 +122,7 @@ function detectFaces() {
 
 video.addEventListener("playing", detectFaces);
 
-// age prediction - removed for speed 
+// age prediction - removed for speed
 // function interpolateAgePredictions(age) {
 //   predictedAges = [age].concat(predictedAges).slice(0, 15);
 //   const avgPredictedAge =
