@@ -20,8 +20,8 @@ A simple web application that uses TinyFace models to dynamically interpret faci
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-username/tinyface-emotion-bg.git
-   cd tinyface-emotion-bg
+   git clone [https://github.com/your-username/tinyface-emotion-bg.git](https://github.com/Greg4268/Emotion_Recognizer)
+   cd Emotion_Recognizer
    ```
 2. Open `index.html` in your browser.
 3. Grant camera access when prompted.
