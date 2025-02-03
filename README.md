@@ -1,4 +1,4 @@
-# TinyFace Emotion Background Changer
+# Facial Emotion Recognizer
 
 A simple web application that uses TinyFace models to dynamically interpret facial emotions from a webcam feed and adjust the background color of the HTML page accordingly.
 
